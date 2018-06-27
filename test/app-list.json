@@ -1,0 +1,20 @@
+[
+  {
+    "path": "oe-cloud",
+    "enabled": true
+  },
+  {
+    "path": "oe-multi-tenancy",
+    "enabled": true
+  },
+  {
+    "path": "./",
+    "forceLoad": "index.js",
+    "enabled": true
+  },
+  {
+    "path": "./",
+    "enabled": true,
+    "serverDir": "test"
+  }
+]

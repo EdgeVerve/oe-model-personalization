@@ -1,0 +1,36 @@
+{
+  "memdb": {
+    "name": "memdb",
+    "connector": "memory"
+  },
+  "transient": {
+    "name": "transient",
+    "connector": "transient"
+  },
+
+  "db": {
+    "host": "localhost",
+    "port": 27017,
+    "url": "mongodb://localhost:27017/oe-model-personalization",
+    "database": "oe-personalization-test",
+    "password": "admin",
+    "name": "db",
+    "connector": "mongodb",
+    "user": "admin",
+    "connectionTimeout": 500000,
+    "connectTimeoutMS": 500000,
+    "socketTimeoutMS": 500000
+  },
+  "pgdb": {
+    "host": "localhost",
+    "port": 5432,
+    "url": "postgres://postgres:postgres@localhost:5432/oe-model-personalization",
+    "database": "oe-personalization-test",
+    "password": "postgres",
+    "name": "pgdb",
+    "connector": "loopback-connector-postgresql",
+    "user": "postgres",
+    "max": 50,
+    "connectionTimeout": 50000
+  }
+}
