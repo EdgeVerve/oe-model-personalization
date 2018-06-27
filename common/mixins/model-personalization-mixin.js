@@ -34,8 +34,11 @@ function beforeSave(ctx, next) {
     var options = ctx.options;
     if (!options || !options.ctx && (ctx.options.ignoreAutoScope || ctx.options.fetchAllScopes)) {
       options = { ctx: instance._autoScope };
-      if (!options.ctx && !instance.filebased) {
-        return next(new Error('Invalid instance of Model Definition. Context not found.'));
+      if (!options.ctx) {
+        if (!instance.filebased) {
+          return next(new Error('Invalid instance of Model Definition. Context not found.'));
+        }
+        options = { ctx: util.getDefaultContext(autoscopeFields) };
       }
     }
     var modelId;
