@@ -20,17 +20,5 @@
     "connectionTimeout": 500000,
     "connectTimeoutMS": 500000,
     "socketTimeoutMS": 500000
-  },
-  "pgdb": {
-    "host": "localhost",
-    "port": 5432,
-    "url": "postgres://postgres:postgres@localhost:5432/oe-model-personalization",
-    "database": "oe-personalization-test",
-    "password": "postgres",
-    "name": "pgdb",
-    "connector": "loopback-connector-postgresql",
-    "user": "postgres",
-    "max": 50,
-    "connectionTimeout": 50000
   }
 }
