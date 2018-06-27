@@ -38,10 +38,11 @@ function beforeSave(ctx, next) {
         return next(new Error('Invalid instance of Model Definition. Context not found.'));
       }
     }
-
     var modelId;
-    if (instance.filebased) {
+    var defaultScoped = util.isDefaultScope(autoscopeFields, options.ctx);
+    if (instance.filebased || defaultScoped) {
       modelId = instance.name;
+      defaultScoped = true;
     } else {
       modelId = util.createModelId(instance.clientModelName, autoscopeFields, options);
     }
@@ -50,15 +51,14 @@ function beforeSave(ctx, next) {
       instance.base = instance.variantOf;
     }
 
-    if (!instance.filebased) {
+    if (!instance.filebased && !defaultScoped) {
       if (!instance.base) {
         instance.base = 'BaseEntity';
       }
-      if (!instance.plural && instance.name) {
+      if (!instance.plural) {
         instance.plural = inflection.pluralize(instance.name);
         log.debug(options, 'Created plural ', instance.plural, 'for model', instance.name);
       }
-
       if (instance.variantOf) {
         var variantModel = loopback.findModel(instance.variantOf, options);
         if (variantModel.definition.settings.mongodb && variantModel.definition.settings.mongodb.collection) {
@@ -77,6 +77,9 @@ function beforeSave(ctx, next) {
       }
     }
     instance.clientPlural = instance.plural;
+    if (!instance.filebased && !defaultScoped) {
+      delete instance.plural;
+    }
     instance.modelId = modelId;
   } catch (exp) {
     return next(exp);
@@ -90,8 +93,6 @@ function beforeAccess(ctx, next) {
   if (modelSettings.mixins.ModelPersonalizationMixin === false) {
     return next();
   }
-
-
   return next();
 }
 
@@ -100,27 +101,6 @@ function afterSave(ctx, next) {
   if (modelSettings.mixins.ModelPersonalizationMixin === false) {
     return next();
   }
-  // try {
-  //  var app = ModelDefinition.app;
-  //  var instance = ctx.instance || ctx.currentInstance || ctx.data;
-  //  if (instance.fileBased) {
-  //    return next();
-  //  }
-  //  //util.createModel(ModelDefinition.app, instance, ctx.options);
-  //  var model = loopback.createModel(instance, ctx.options);
-  //  var ds = model.getDataSource(options);
-  //  if (!ds) {
-  //    // Mixins get attached at this step
-  //    ds = app.dataSources.db;
-  //  }
-  //  ds.attach(model);
-  //  app.model(model);
-  //  log.debug(options, 'DEBUG: lib/common/util.js: Model loaded from database : ', instance.name);
-  // }
-  // catch (exp) {
-  //  return next(exp);
-  // }
-
   return next();
 }
 
