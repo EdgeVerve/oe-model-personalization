@@ -62,14 +62,83 @@ var api = defaults(supertest(app));
 var basePath = app.get('restApiRoot');
 var url = basePath + '/Customers';
 
+var models = oecloud.models;
+
+
+
+function deleteAllUsers(done) {
+  var userModel = loopback.findModel("User");
+  userModel.destroyAll({}, {}, function (err) {
+    return done(err);
+  });
+}
+
+var globalCtx = {
+  ignoreAutoScope: true,
+  ctx: { tenantId : '/default'}
+};
+
+function createEmployeeModels(done) {
+
+  models.ModelDefinition.create({
+    'name': 'Employee',
+    'idInjection': false,
+    'base': 'BaseEntity',
+    properties: {
+      'name': {
+        'type': 'string',
+        'required': true
+      }
+    },
+    'relations': {
+      'address': {
+        'type': 'hasMany',
+        'model': 'EmployeeAddress',
+        'foreignKey': 'EmployeeId'
+      }
+    },
+    'filebased': false,
+    'acls': [{
+      'principalType': 'ROLE',
+      'principalId': '$everyone',
+      'permission': 'ALLOW',
+      'accessType': '*'
+    }]
+  }, globalCtx, function (err, model) {
+    if (err) {
+      return done(err);
+    }
+    models.ModelDefinition.create({
+      name: 'EmployeeAddress',
+      'idInjection': false,
+      base: 'BaseEntity',
+      properties: {
+        'city': {
+          'type': 'string',
+          'required': true
+        }
+      },
+      'relations': {},
+      filebased: false
+    }, globalCtx, function (err2, model2) {
+      expect(err2).to.be.not.ok;
+      done(err2);
+    });
+  });
+}
+
+
+
+
 describe(chalk.blue('Model Personalization Test Started'), function (done) {
   this.timeout(10000);
   before('wait for boot scripts to complete', function (done) {
     app.on('test-start', function () {
       Customer = loopback.findModel("Customer");
-      var userModel = loopback.findModel("User");
-      userModel.destroyAll({}, {}, function (err) {
-        return done(err);
+      deleteAllUsers(function () {
+        createEmployeeModels(function (err) {
+          return done(err);
+        });
       });
     });
   });

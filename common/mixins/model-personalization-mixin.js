@@ -1,7 +1,8 @@
 const inflection = require('inflection');
-const util = require('../../lib/utils.js');
+const utils = require('../../lib/utils.js');
+const utils2 = require('oe-multi-tenancy/lib/utils.js');
 const loopback = require('loopback');
-
+const _ = require('lodash');
 const log = require('oe-logger')('Model-Personalization-Mixin');
 
 // var ModelDefinition;
@@ -12,12 +13,8 @@ module.exports = Model => {
 
   if ((Model.settings.overridingMixins && !Model.settings.overridingMixins.ModelPersonalizationMixin) || !Model.definition.settings.mixins.ModelPersonalizationMixin) {
     Model.evRemoveObserver('before save', beforeSave);
-    Model.evRemoveObserver('access', beforeAccess);
-    Model.evRemoveObserver('after save', afterSave);
   } else {
     Model.evObserve('before save', beforeSave);
-    Model.evObserve('access', beforeAccess);
-    Model.evObserve('after save', afterSave);
   }
 };
 
@@ -32,22 +29,22 @@ function beforeSave(ctx, next) {
 
     var autoscopeFields = modelSettings.autoscope;
     var options = ctx.options;
-    if (!options || !options.ctx && (ctx.options.ignoreAutoScope || ctx.options.fetchAllScopes)) {
+    if (!options || !options.ctx || _.isEmpty(options.ctx) && (ctx.options.ignoreAutoScope || ctx.options.fetchAllScopes)) {
       options = { ctx: instance._autoScope };
-      if (!options.ctx) {
+      if (!options.ctx || _.isEmpty(options.ctx)) {
         if (!instance.filebased) {
           return next(new Error('Invalid instance of Model Definition. Context not found.'));
         }
-        options = { ctx: util.getDefaultContext(autoscopeFields) };
+        options = { ctx: utils2.getDefaultContext(autoscopeFields) };
       }
     }
     var modelId;
-    var defaultScoped = util.isDefaultScope(autoscopeFields, options.ctx);
+    var defaultScoped = utils2.isDefaultContext(autoscopeFields, options.ctx);
     if (instance.filebased || defaultScoped) {
       modelId = instance.name;
       defaultScoped = true;
     } else {
-      modelId = util.createModelId(instance.clientModelName, autoscopeFields, options);
+      modelId = utils.createModelId(instance.clientModelName, autoscopeFields, options);
     }
 
     if (instance.variantOf) {
@@ -88,22 +85,6 @@ function beforeSave(ctx, next) {
     return next(exp);
   }
 
-  return next();
-}
-
-function beforeAccess(ctx, next) {
-  const modelSettings = ctx.Model.definition.settings;
-  if (modelSettings.mixins.ModelPersonalizationMixin === false) {
-    return next();
-  }
-  return next();
-}
-
-function afterSave(ctx, next) {
-  const modelSettings = ctx.Model.definition.settings;
-  if (modelSettings.mixins.ModelPersonalizationMixin === false) {
-    return next();
-  }
   return next();
 }
 
