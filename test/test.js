@@ -68,7 +68,8 @@ var models = oecloud.models;
 
 function deleteAllUsers(done) {
   var userModel = loopback.findModel("User");
-  userModel.destroyAll({}, {}, function (err) {
+  userModel.destroyAll({}, {}, function (err, results) {
+    console.log(results);
     return done(err);
   });
 }
@@ -135,7 +136,8 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
   before('wait for boot scripts to complete', function (done) {
     app.on('test-start', function () {
       Customer = loopback.findModel("Customer");
-      deleteAllUsers(function () {
+      deleteAllUsers(function (err) {
+        if(err) return done(err);
         createEmployeeModels(function (err) {
           return done(err);
         });
