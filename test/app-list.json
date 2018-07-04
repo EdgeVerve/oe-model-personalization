@@ -8,6 +8,14 @@
     "enabled": true
   },
   {
+    "path": "oe-validation",
+    "enabled":true 
+  },
+  {
+    "path": "oe-model-composite",
+    "enabled":true
+  },
+  {
     "path": "./",
     "forceLoad": "index.js",
     "enabled": true

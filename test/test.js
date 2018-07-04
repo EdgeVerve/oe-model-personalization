@@ -1,6 +1,17 @@
+/**
+ *
+ * ©2018-2019 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
+ * Bangalore, India. All Rights Reserved.
+ *
+ */
+
+
 var oecloud = require('oe-cloud');
-var loopback=require('loopback');
+var loopback = require('loopback');
+
 oecloud.observe('loaded', function (ctx, next) {
+  oecloud.setBaseEntityAutoscope(["tenantId"]);
+  oecloud.attachMixinsToBaseEntity("ModelPersonalizationMixin");
   oecloud.setModelDefinitionAutoscope(["tenantId"]);
   return next();
 })
@@ -38,6 +49,12 @@ oecloud.boot(__dirname, function (err) {
       else if (user.username === "bpouser") {
         instance.tenantId = '/default/infosys/bpo';
       }
+      else if (user.username === "iciciuser") {
+        instance.tenantId = '/default/icici';
+      }
+      else if (user.username === "citiuser") {
+        instance.tenantId = '/default/citi';
+      }
       return next(err);
     });
   });
@@ -68,8 +85,18 @@ var models = oecloud.models;
 
 function deleteAllUsers(done) {
   var userModel = loopback.findModel("User");
-  userModel.destroyAll({}, {}, function (err, results) {
-    console.log(results);
+  userModel.destroyAll({}, {}, function (err) {
+    if (err) {
+      return done(err);
+    }
+    userModel.find({}, {}, function (err2, r2) {
+      if (err2) {
+        return done(err2);
+      }
+      if (r2 && r2.length > 0) {
+        return done(new Error("Error : users were not deleted"));
+      }
+    });
     return done(err);
   });
 }
@@ -79,8 +106,19 @@ var globalCtx = {
   ctx: { tenantId : '/default'}
 };
 
-function createEmployeeModels(done) {
+var iciciCtx = {
+  ctx: { tenantId : '/default/icici'}
+};
 
+var citiCtx = {
+  ctx: { tenantId: '/default/citi' }
+};
+
+var defaultContext = {
+  ctx: { tenantId: '/default' }
+};
+
+function createEmployeeModels(done) {
   models.ModelDefinition.create({
     'name': 'Employee',
     'idInjection': false,
@@ -128,19 +166,17 @@ function createEmployeeModels(done) {
   });
 }
 
-
-
-
 describe(chalk.blue('Model Personalization Test Started'), function (done) {
   this.timeout(10000);
   before('wait for boot scripts to complete', function (done) {
     app.on('test-start', function () {
       Customer = loopback.findModel("Customer");
-      deleteAllUsers(function (err) {
-        if(err) return done(err);
-        createEmployeeModels(function (err) {
-          return done(err);
+      deleteAllUsers(function () {
+        createEmployeeModels(function (err, result) {
+          console.log(err, result)
+          return done();
         });
+        //return done();
       });
     });
   });
@@ -156,7 +192,10 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
     .send([{ username: "admin", password: "admin", email: "admin@admin.com" },
     { username: "evuser", password: "evuser", email: "evuser@evuser.com" },
     { username: "infyuser", password: "infyuser", email: "infyuser@infyuser.com" },
-    { username: "bpouser", password: "bpouser", email: "infyuser@infyuser.com" }])
+    { username: "bpouser", password: "bpouser", email: "infyuser@infyuser.com" },
+    { username: "iciciuser", password: "iciciuser", email: "iciciuser@iciciuser.com" },
+    { username: "citiuser", password: "citiuser", email: "citiuser@citiuser.com" }
+    ])
     .end(function (err, response) {
 
       var result = response.body;
@@ -164,6 +203,8 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
       expect(result[1].id).to.be.defined;
       expect(result[2].id).to.be.defined;
       expect(result[3].id).to.be.defined;
+      expect(result[4].id).to.be.defined;
+      expect(result[5].id).to.be.defined;
       done();
     });
   });
@@ -225,6 +266,246 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
       done();
     });
   });
+
+
+  var icicitoken;
+  it('t5 Login with bpo credentials', function (done) {
+    var url = basePath + '/users/login';
+    api.set('Accept', 'application/json')
+    .post(url)
+    .send({ username: "iciciuser", password: "iciciuser" })
+    .end(function (err, response) {
+      var result = response.body;
+      icicitoken = result.id;
+      expect(bpoToken).to.be.defined;
+      done();
+    });
+  });
+
+
+  var cititoken;
+  it('t5 Login with bpo credentials', function (done) {
+    var url = basePath + '/users/login';
+    api.set('Accept', 'application/json')
+    .post(url)
+    .send({ username: "citiuser", password: "citiuser" })
+    .end(function (err, response) {
+      var result = response.body;
+      cititoken = result.id;
+      expect(bpoToken).to.be.defined;
+      done();
+    });
+  });
+
+  it('t6 clean up Employee and EmployeeAddress models', function (done) {
+    var Employee = loopback.getModel('Employee', defaultContext);
+    Employee.destroyAll({}, { ignoreAutoScope: true }, function (err) {
+      if (err)
+        return done(err);
+      var EmployeeAddress = loopback.getModel('EmployeeAddress', defaultContext);
+      EmployeeAddress.destroyAll({}, { ignoreAutoScope: true }, function (err) {
+        return done(err);
+      });
+    });
+  });
+
+  it('t7 Populate data as Icicic - 2 Employee record should be created and 2 address records each should be created', function (done) {
+    var Employee = loopback.getModel('Employee', defaultContext);
+    Employee.create([{
+      'name': 'Tom',
+      'id': 1,
+      'address': [{
+        'city': 'Denver',
+        'id': 11
+      }, {
+        'id': 12,
+        'city': 'Frankfort'
+      }]
+    }, {
+      'name': 'Harry',
+      'id': 2,
+      'address': [{
+        'city': 'London',
+        'id': 21
+      }, {
+        'id': 22,
+        'city': 'Paris'
+      }]
+    }], iciciCtx, function (err, results) {
+      if (err) {
+        return done(err);
+      }
+      expect(results[0]).to.have.property('name');
+      expect(results[0]).to.have.property('id');
+      expect(results[0].__data).to.have.property('address');
+      expect(results[0].name).to.equal('Tom');
+      expect(results[0].__data.address[0]).to.have.property('city');
+      expect(results[0].__data.address[0].city).to.equal('Denver');
+      expect(results[0].__data.address[1].city).to.equal('Frankfort');
+      expect(results[1]).to.have.property('name');
+      expect(results[1]).to.have.property('id');
+      expect(results[1].__data).to.have.property('address');
+      expect(results[1].name).to.equal('Harry');
+      expect(results[1].__data.address[0]).to.have.property('city');
+      expect(results[1].__data.address[0].city).to.equal('London');
+      expect(results[1].__data.address[1].city).to.equal('Paris');
+      done();
+    });
+  });
+
+  it('t8 Populate data as Citi - 1 Employee record should be created and 2 address records should be created', function (done) {
+    var Employee = loopback.getModel('Employee', defaultContext);
+    Employee.create([{
+      'name': 'John',
+      'id': 11,
+      'address': [{
+        'city': 'Mumbai',
+        'id': 111
+      }, {
+        'id': 112,
+        'city': 'Delhi'
+      }]
+    }
+    ], citiCtx, function (err, results) {
+      if (err) {
+        return done(err);
+      }
+      expect(results[0]).to.have.property('name');
+      expect(results[0]).to.have.property('id');
+      expect(results[0].__data).to.have.property('address');
+      expect(results[0].name).to.equal('John');
+      expect(results[0].__data.address[0]).to.have.property('city');
+      expect(results[0].__data.address[0].city).to.equal('Mumbai');
+      expect(results[0].__data.address[1].city).to.equal('Delhi');
+      done();
+    });
+  });
+
+
+
+  it('t9 - Fetch data as Citi - should return ONE Employees and two addresses for it', function (done) {
+    var Employee = loopback.getModel('Employee', citiCtx);
+    Employee.find({
+      include: 'address'
+    }, citiCtx, function (err, results) {
+      if (err) {
+        console.log(err);
+        return done(err);
+      }
+      //console.log(JSON.stringify(results));
+      expect(results.length).to.equal(1);
+      expect(results[0]).to.have.property('name');
+      expect(results[0]).to.have.property('id');
+      expect(results[0]).to.have.property('address');
+      expect(results[0].name).to.equal('John');
+      expect(results[0].__data.address[0]).to.have.property('city');
+      expect(results[0].__data.address[0].city).to.equal('Mumbai');
+
+      done();
+    });
+  });
+
+
+  it('t10 - Fetch data as Icici - should return TWO Employees and ONE addresses for each', function (done) {
+    var Employee = loopback.getModel('Employee', iciciCtx);
+    Employee.find({
+      include: 'address'
+    }, iciciCtx, function (err, results) {
+      if (err) {
+        console.log(err);
+        return done(err);
+      }
+      //console.log(JSON.stringify(results));
+      expect(results.length).to.equal(2);
+      expect(results[0]).to.have.property('name');
+      expect(results[0]).to.have.property('id');
+      expect(results[0]).to.have.property('address');
+      expect(results[0].name).to.equal('Tom');
+      expect(results[0].__data.address[0]).to.have.property('city');
+      expect(results[0].__data.address[0].city).to.equal('Denver');
+      done();
+    });
+  });
+
+
+  it('t11 - Personalized Employee model for icici', function (done) {
+    // new Employee model will b created in mongo
+    // mongo:true is set so that new collection will be used
+    models.ModelDefinition.create({
+      'name': 'Employee',
+      'variantOf': 'Employee',
+      'idInjection': false,
+      'base': 'Employee',
+      mongodb: {
+        collection: 'employee-icici'
+      },
+      properties: {
+        'age': {
+          'type': 'number'
+        }
+      },
+      'acl': []
+    }, iciciCtx, function (err, m) {
+      if (err) {
+        console.log(err);
+        return done(err);
+      }
+      var Employee = loopback.getModel('Employee', iciciCtx);
+      Employee.create([{
+        'name': 'Icici Tom',
+        'age': 10,
+        'id': 31,
+        'address': [{
+          'city': 'Bangalore',
+          'id': 311
+        }]
+      }], iciciCtx, function (err, results) {
+        if (err) {
+          //console.log(JSON.stringify(err));
+          return done(err);
+        }
+
+        expect(results.length).to.equal(1);
+        expect(results[0]).to.have.property('name');
+        expect(results[0]).to.have.property('id');
+        expect(results[0].__data).to.have.property('address');
+        expect(results[0].name).to.equal('Icici Tom');
+        expect(results[0].__data.address[0]).to.have.property('city');
+        expect(results[0].__data.address[0].city).to.equal('Bangalore');
+        // previous records for icici are still retain  as new records are will use same collection
+        // user can have new collection if he/she wants
+        Employee.find({
+          include: 'address'
+        }, iciciCtx, function (err, results) {
+          expect(results.length).to.equal(3);
+          expect(results[0]).to.have.property('name');
+          expect(results[0]).to.have.property('id');
+          expect(results[0].__data).to.have.property('address');
+          //expect(results[0]).to.have.property('age');
+          var doneFlag = false;
+          for (var i = 0; i < results.length && !doneFlag; ++i) {
+            console.log(results[i].__data.address);
+            if (results[i].name === 'Icici Tom') {
+              for (var j = 0; j < results[i].__data.address.length; ++j) {
+                if (results[i].__data.address[j].city === 'Bangalore') {
+                  expect(results[i].age).to.equal(10);
+                  doneFlag = true;
+                  break;
+                }
+              }
+            }
+          }
+          expect(doneFlag).to.be.true;
+          done();
+        });
+
+      });
+
+    });
+  });
+
+
+
 });
 
 

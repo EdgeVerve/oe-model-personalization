@@ -6,6 +6,7 @@ module.exports = function (app, done) {
     console.log(err);
     var item1 = {
       'name': 'Customer A',
+      id : "abcd",
       'age': 10
     };
     var item2 = {

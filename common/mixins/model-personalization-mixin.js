@@ -1,3 +1,11 @@
+/**
+ *
+ * �2018-2019 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
+ * Bangalore, India. All Rights Reserved.
+ *
+ */
+
+
 const inflection = require('inflection');
 const utils = require('../../lib/utils.js');
 const utils2 = require('oe-multi-tenancy/lib/utils.js');
@@ -11,12 +19,71 @@ log.info('Model Personalization Mixin Loaded.');
 module.exports = Model => {
   // ModelDefinition = Model;
 
+  if (Model.modelName !== 'ModelDefinition') {
+    if (Model.modelName === 'BaseEntity') {
+      Model.evObserve('after access', getVariantData);
+    }
+    return;
+  }
+
   if ((Model.settings.overridingMixins && !Model.settings.overridingMixins.ModelPersonalizationMixin) || !Model.definition.settings.mixins.ModelPersonalizationMixin) {
     Model.evRemoveObserver('before save', beforeSave);
   } else {
     Model.evObserve('before save', beforeSave);
   }
 };
+
+/**
+ * This function is used to find whether whether variant model use same collection.
+ *
+ * @param {object}settings1 - settings of first model
+ * @param {object}settings2 - settings of second model
+ * @returns {boolean} - returns true for same collection.
+ * @function
+ */
+const isSameCollection = function isSameCollection(settings1, settings2) {
+  if (!settings1.mongodb || !settings2.mongodb) {
+    return false;
+  }
+  var collection1 = settings1.mongodb.collection;
+  if (collection1) { collection1 = collection1.toLowerCase(); }
+  var collection2 = settings2.mongodb.collection;
+  if (collection2) { collection2 = collection2.toLowerCase(); }
+  if (collection1 === collection2) { return true; }
+  return false;
+};
+
+function getVariantData(ctx, next) {
+  var Model = ctx.Model;
+
+  if ((Model.settings.overridingMixins && !Model.settings.overridingMixins.ModelPersonalizationMixin) || !Model.definition.settings.mixins.ModelPersonalizationMixin) {
+    return next();
+  }
+
+  let result = ctx.accdata || [];
+  const modelSettings = ctx.Model.definition.settings;
+  if (!modelSettings.variantOf) {
+    return next();
+  }
+  var variantModel = loopback.findModel(modelSettings.variantOf);
+  if (!variantModel) {
+    return next();
+  }
+  if (isSameCollection(variantModel.definition.settings, modelSettings)) {
+    return next();
+  }
+  variantModel.find(ctx.query, ctx.options, function (err, variantData) {
+    if (err) {
+      return next(err);
+    }
+    if (variantData && variantData.length) {
+      result = result.concat(variantData);
+      ctx.accdata = result;
+    }
+    return next();
+  });
+}
+
 
 function beforeSave(ctx, next) {
   const modelSettings = ctx.Model.definition.settings;
