@@ -484,7 +484,6 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
           //expect(results[0]).to.have.property('age');
           var doneFlag = false;
           for (var i = 0; i < results.length && !doneFlag; ++i) {
-            console.log(results[i].__data.address);
             if (results[i].name === 'Icici Tom') {
               for (var j = 0; j < results[i].__data.address.length; ++j) {
                 if (results[i].__data.address[j].city === 'Bangalore') {
@@ -498,13 +497,49 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
           expect(doneFlag).to.be.true;
           done();
         });
-
       });
-
     });
   });
 
 
+  it('t12 - Address is not personalized and it should return 5 records for icici', function (done) {
+    // two records from 1st testcase and other is just when we personalized
+    var address = loopback.getModel('EmployeeAddress', iciciCtx);
+
+    address.find({}, iciciCtx, function (err, results) {
+      if (err) {
+        console.log(err);
+        return done(err);
+      }
+      expect(results.length).to.equal(5);
+      expect(results[0].city).to.equal('Denver');
+      done();
+    });
+  });
+
+
+  it('t13 - Fetch data as Citi - should still return ONE Employees and two addresses for it', function (done) {
+    // demonstrating that for citi - nothing yet affected
+    var Employee = loopback.getModel('Employee', citiCtx);
+    Employee.find({
+      include: 'address'
+    }, citiCtx, function (err, results) {
+      if (err) {
+        console.log(err);
+        return done(err);
+      }
+      //console.log(JSON.stringify(results));
+      expect(results.length).to.equal(1);
+      expect(results[0]).to.have.property('name');
+      expect(results[0]).to.have.property('id');
+      expect(results[0]).to.have.property('address');
+      expect(results[0].name).to.equal('John');
+      expect(results[0].__data.address[0]).to.have.property('city');
+      expect(results[0].__data.address[0].city).to.equal('Mumbai');
+
+      done();
+    });
+  });
 
 });
 
