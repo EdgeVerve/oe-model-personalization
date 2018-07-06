@@ -584,7 +584,6 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
         // will see this new record of address is created in newly created address collection
         // while Employee will be in same old collection
         expect(results.length).to.equal(1);
-        debugger;
         Employee.find({
           include: 'address'
         }, citiCtx, function (err, results) {
@@ -676,10 +675,81 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
         done();
       });
   });
+
+
+  it('t17-1 - icici tenant is creating Model Pen where name is property (using HTTP REST)', function (done) {
+    var penModel = {
+      'name': 'Pen',
+      properties: {
+        'name': {
+          'type': 'string'
+        }
+      }
+    };
+
+    api
+      .set('Accept', 'application/json')
+      .post(basePath + '/ModelDefinitions' + '?access_token=' + icicitoken)
+      .send(penModel)
+      .expect(200).end(function (err, res) {
+        //console.log('response body : ' + JSON.stringify(res.body, null, 4));
+        if (err || res.body.error) {
+          return done(err || (new Error(res.body.error)));
+        }
+        //var results = res.body;
+        done();
+      });
+  });
+
+  it('t17-1 - citi tenant is creating Model Pen where color is property (using HTTP REST)', function (done) {
+    var penModel = {
+      'name': 'Pen',
+      properties: {
+        'color': {
+          'type': 'string'
+        }
+      }
+    };
+
+    api
+      .set('Accept', 'application/json')
+      .post(basePath + '/ModelDefinitions' + '?access_token=' + cititoken)
+      .send(penModel)
+      .expect(200).end(function (err, res) {
+        //console.log('response body : ' + JSON.stringify(res.body, null, 4));
+        if (err || res.body.error) {
+          return done(err || (new Error(res.body.error)));
+        }
+        //var results = res.body;
+        done();
+      });
+  });
+
+  xit('t17-1 - icici tenant is creating Model Pen where name is property (using HTTP REST)', function (done) {
+    var penModel = {
+      'name': 'Pen',
+      properties: {
+        'name': {
+          'type': 'string'
+        }
+      }
+    };
+
+    api
+      .set('Accept', 'application/json')
+      .post(basePath + '/ModelDefinitions' + '?access_token=' + icicitoken)
+      .send(penModel)
+      .expect(200).end(function (err, res) {
+        //console.log('response body : ' + JSON.stringify(res.body, null, 4));
+        if (err || res.body.error) {
+          return done(err || (new Error(res.body.error)));
+        }
+        //var results = res.body;
+        done();
+      });
+  });
+
 });
-
-
-
 
 
 

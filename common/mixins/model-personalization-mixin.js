@@ -69,9 +69,16 @@ function getVariantData(ctx, next) {
   if (!variantModel) {
     return next();
   }
-  //if (isSameCollection(variantModel.definition.settings, modelSettings)) {
-    //return next();
-  //}
+
+
+  var ds1 = ctx.Model.getDataSource(ctx.options);
+  var ds2 = variantModel.getDataSource(ctx.options);
+
+  if (ds1 === ds2 && (ds1.connector.name.indexOf('mongodb') >= 0 || ds1.connector.name.indexOf('memory') >= 0)) {
+    if (isSameCollection(variantModel.definition.settings, modelSettings)) {
+      return next();
+    }
+  }
   variantModel.find(ctx.query, ctx.options, function (err, variantData) {
     if (err) {
       return next(err);
@@ -81,7 +88,7 @@ function getVariantData(ctx, next) {
       ctx.accdata = result;
     }
     return next();
-  }, undefined, true);
+  }, true);
 }
 
 
