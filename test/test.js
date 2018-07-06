@@ -195,7 +195,7 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
     .send([{ username: "admin", password: "admin", email: "admin@admin.com" },
     { username: "evuser", password: "evuser", email: "evuser@evuser.com" },
     { username: "infyuser", password: "infyuser", email: "infyuser@infyuser.com" },
-    { username: "bpouser", password: "bpouser", email: "infyuser@infyuser.com" },
+    { username: "bpouser", password: "bpouser", email: "bpouser@infyuser.com" },
     { username: "iciciuser", password: "iciciuser", email: "iciciuser@iciciuser.com" },
     { username: "citiuser", password: "citiuser", email: "citiuser@citiuser.com" }
     ])
