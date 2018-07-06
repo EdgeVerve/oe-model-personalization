@@ -69,9 +69,9 @@ function getVariantData(ctx, next) {
   if (!variantModel) {
     return next();
   }
-  if (isSameCollection(variantModel.definition.settings, modelSettings)) {
-    return next();
-  }
+  //if (isSameCollection(variantModel.definition.settings, modelSettings)) {
+    //return next();
+  //}
   variantModel.find(ctx.query, ctx.options, function (err, variantData) {
     if (err) {
       return next(err);
