@@ -77,7 +77,7 @@ var supertest = require('supertest');
 var Customer;
 var api = defaults(supertest(app));
 var basePath = app.get('restApiRoot');
-var url = basePath + '/Customers';
+var url = basePath + '/Employees';
 
 var models = oecloud.models;
 
@@ -135,6 +135,9 @@ function createEmployeeModels(done) {
         'model': 'EmployeeAddress',
         'foreignKey': 'EmployeeId'
       }
+    },
+    mongodb: {
+      collection: 'employee'
     },
     'filebased': false,
     'acls': [{
@@ -541,6 +544,138 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
     });
   });
 
+  it('t14 - Personalized Address model for citi', function (done) {
+    //EmployeeAddress model is personalized and new model with random number will be created
+    //mongodb: true is set thus it will create new collection
+    models.ModelDefinition.create({
+      'name': 'EmployeeAddress',
+      'variantOf': 'EmployeeAddress',
+      'idInjection': false,
+      'base': 'EmployeeAddress',
+      mongodb: {
+        collection: 'employeeaddress-citi'
+      },
+      properties: {
+        'zip': {
+          'type': 'string'
+        }
+      },
+      'filebased': false
+    }, citiCtx, function (err, m) {
+      if (err) {
+        console.log(err);
+        return done(err);
+      }
+      var Employee = loopback.getModel('Employee', citiCtx);
+      Employee.create([{
+        'name': 'Citi Tom',
+        'age': 10,
+        'id': 51,
+        'address': [{
+          'city': 'Citi Bangalore',
+          'zip': '560001',
+          'id': 511
+        }]
+      }], citiCtx, function (err, results) {
+        if (err) {
+          console.log(JSON.stringify(err));
+          return done(err);
+        }
+        // will see this new record of address is created in newly created address collection
+        // while Employee will be in same old collection
+        expect(results.length).to.equal(1);
+        debugger;
+        Employee.find({
+          include: 'address'
+        }, citiCtx, function (err, results) {
+          expect(results.length).to.equal(2);
+          var doneFlag = false;
+          for (var i = 0; i < results.length && !doneFlag; ++i) {
+            if (results[i].name === 'Citi Tom') {
+              for (var j = 0; j < results[i].__data.address.length; ++j) {
+                if (results[i].__data.address[j].city === 'Citi Bangalore') {
+                  expect(results[i]).to.have.property('name');
+                  expect(results[i]).to.have.property('id');
+                  expect(results[i]).to.have.property('address');
+                  expect(results[i].__data.address[j]).to.have.property('zip');
+                  expect(results[i].name).to.equal('Citi Tom');
+                  doneFlag = true;
+                  break;
+                }
+              }
+            }
+          }
+          expect(doneFlag).to.be.true;
+          done();
+        });
+      });
+    });
+  });
+
+  it('t14 - Personalized Address model for citi should return 1 record from personalized address model collection and 2 records from original address collection', function (done) {
+    var address = loopback.getModel('EmployeeAddress', citiCtx);
+    address.find({}, citiCtx, function (err, results) {
+      if (err) {
+        console.log(err);
+        return done(err);
+      }
+      expect(results.length).to.equal(3);
+      var doneFlag = false;
+      for (var i = 0; i < results.length; ++i) {
+        if (results[i].city === 'Citi Bangalore') {
+          doneFlag = true;
+          break;
+        }
+      }
+      expect(doneFlag).to.be.true;
+      done();
+    });
+  });
+
+
+  it('t15 - Personalized Employee model for citi using HTTP REST', function (done) {
+
+    var Employeemodel = {
+      'name': 'Employee',
+      'variantOf': 'Employee',
+      'idInjection': false,
+      'mongodb': {},
+      properties: {
+        'firstName': {
+          'type': 'string'
+        }
+      }
+    };
+
+    api
+      .set('Accept', 'application/json')
+      .post(basePath + '/ModelDefinitions' + '?access_token=' + cititoken)
+      .send(Employeemodel)
+      .expect(200).end(function (err, res) {
+        //console.log('response body : ' + JSON.stringify(res.body, null, 4));
+        if (err || res.body.error) {
+          return done(err || (new Error(res.body.error)));
+        }
+        //var results = res.body;
+        done();
+      });
+  });
+
+  it('t16 - Personalized Employee model for citi should return 0 record from personalized address model(using HTTP REST)', function (done) {
+    api
+      .set('Accept', 'application/json')
+      .get(basePath + '/Employees?access_token=' + cititoken)
+      .send()
+      .expect(200).end(function (err, res) {
+        //console.log('response body : ' + JSON.stringify(res.body, null, 4));
+        if (err || res.body.error) {
+          return done(err || (new Error(res.body.error)));
+        }
+        var results = res.body;
+        expect(results.length).to.equal(2);
+        done();
+      });
+  });
 });
 
 

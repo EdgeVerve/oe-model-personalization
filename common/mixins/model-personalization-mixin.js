@@ -81,7 +81,7 @@ function getVariantData(ctx, next) {
       ctx.accdata = result;
     }
     return next();
-  });
+  }, undefined, true);
 }
 
 
