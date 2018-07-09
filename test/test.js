@@ -195,7 +195,7 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
     .send([{ username: "admin", password: "admin", email: "admin@admin.com" },
     { username: "evuser", password: "evuser", email: "evuser@evuser.com" },
     { username: "infyuser", password: "infyuser", email: "infyuser@infyuser.com" },
-    { username: "bpouser", password: "bpouser", email: "bpouser@infyuser.com" },
+    { username: "bpouser", password: "bpouser", email: "bpouser@bpouser.com" },
     { username: "iciciuser", password: "iciciuser", email: "iciciuser@iciciuser.com" },
     { username: "citiuser", password: "citiuser", email: "citiuser@citiuser.com" }
     ])
@@ -676,13 +676,15 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
       });
   });
 
-
+  // following test cases shows that two different tenants creating model with same name
+  // both can have different properties
   it('t17-1 - icici tenant is creating Model Pen where name is property (using HTTP REST)', function (done) {
     var penModel = {
       'name': 'Pen',
       properties: {
         'name': {
-          'type': 'string'
+          'type': 'string',
+          'require' : true
         }
       }
     };
@@ -701,12 +703,13 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
       });
   });
 
-  it('t17-1 - citi tenant is creating Model Pen where color is property (using HTTP REST)', function (done) {
+  it('t17-2 - citi tenant is creating Model Pen where color is property (using HTTP REST)', function (done) {
     var penModel = {
       'name': 'Pen',
       properties: {
         'color': {
-          'type': 'string'
+          'type': 'string',
+          'require': true
         }
       }
     };
@@ -725,29 +728,117 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
       });
   });
 
-  xit('t17-1 - icici tenant is creating Model Pen where name is property (using HTTP REST)', function (done) {
-    var penModel = {
-      'name': 'Pen',
-      properties: {
-        'name': {
-          'type': 'string'
-        }
-      }
+  it('t18-1 - icici tenant is creating data in Pen Model(using HTTP REST)', function (done) {
+    var penData = {
+      'name': 'Reynolds'
     };
 
     api
       .set('Accept', 'application/json')
-      .post(basePath + '/ModelDefinitions' + '?access_token=' + icicitoken)
-      .send(penModel)
-      .expect(200).end(function (err, res) {
-        //console.log('response body : ' + JSON.stringify(res.body, null, 4));
+      .post(basePath + '/Pens' + '?access_token=' + icicitoken)
+      .send(penData)
+      .end(function (err, res) {
         if (err || res.body.error) {
           return done(err || (new Error(res.body.error)));
         }
+        expect(res.status).to.be.equal(200);
+        var result = res.body;
+        expect(result.id).not.to.be.undefined;
+        expect(result.name).to.be.equal('Reynolds');
         //var results = res.body;
         done();
       });
   });
+  it('t18-2 - icici tenant is creating data in Pen Model with wrong column name(using HTTP REST)', function (done) {
+    var penData = {
+      'color': 'red'
+    };
+
+    api
+      .set('Accept', 'application/json')
+      .post(basePath + '/Pens' + '?access_token=' + icicitoken)
+      .send(penData)
+      .end(function (err, res) {
+        if (err || res.body.error) {
+          return done(err || (new Error(res.body.error)));
+        }
+        expect(res.status).to.be.equal(200);
+        var result = res.body;
+        expect(result.id).not.to.be.undefined;
+        // as color was not inserted in for icici pen
+        expect(result.color).to.be.undefined;
+        done();
+      });
+  });
+
+  it('t18-2 - citi tenant is creating data in Pen Model (using HTTP REST)', function (done) {
+    var penData = {
+      'color': 'red'
+    };
+    api
+      .set('Accept', 'application/json')
+      .post(basePath + '/Pens' + '?access_token=' + cititoken)
+      .send(penData)
+      .end(function (err, res) {
+        if (err || res.body.error) {
+          return done(err || (new Error(res.body.error)));
+        }
+        expect(res.status).to.be.equal(200);
+        var result = res.body;
+        expect(result.id).not.to.be.undefined;
+        // as color was inserted in for citi pen
+        expect(result.color).to.be.equal('red');
+        done();
+      });
+  });
+
+  it('t18-3 - icici tenant is accessing Pen Model data - it should recieve data of it\'s version of Pen model (using HTTP REST)', function (done) {
+    api
+      .set('Accept', 'application/json')
+      .get(basePath + '/Pens' + '?access_token=' + icicitoken)
+      .send()
+      .end(function (err, res) {
+        if (err || res.body.error) {
+          return done(err || (new Error(res.body.error)));
+        }
+        expect(res.status).to.be.equal(200);
+        var result = res.body;
+        expect(result.length).be.equal(2);
+        var foundpen = false;
+        var foundempty=false;
+        for (var i = 0; i < result.length; ++i) {
+          if (!foundpen && result[i].name === 'Reynolds' && !result[i].color) {
+            foundpen = true;
+          }
+          else if (!foundempty && result[i].id && !result[i].name) {
+            foundempty=true;
+          }
+        }
+        if (!foundempty || !foundpen) {
+          return done(new Error("Didn't find Pen record for icici tenant"));
+        }
+        done();
+      });
+  });
+
+  it('t18-3 - citi tenant is accessing Pen Model data - it should recieve data of it\'s version of Pen model (using HTTP REST)', function (done) {
+    api
+      .set('Accept', 'application/json')
+      .get(basePath + '/Pens' + '?access_token=' + cititoken)
+      .send()
+      .end(function (err, res) {
+        if (err || res.body.error) {
+          return done(err || (new Error(res.body.error)));
+        }
+        expect(res.status).to.be.equal(200);
+        var result = res.body;
+        expect(result.length).be.equal(1);
+        expect(result[0].color).to.equal('red');
+        expect(result[0].name).to.be.undefined;
+        done();
+      });
+  });
+
 
 });
 
