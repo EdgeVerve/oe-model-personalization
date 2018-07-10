@@ -139,7 +139,6 @@ function createEmployeeModels(done) {
     mongodb: {
       collection: 'employee'
     },
-    'filebased': false,
     'acls': [{
       'principalType': 'ROLE',
       'principalId': '$everyone',
@@ -160,8 +159,7 @@ function createEmployeeModels(done) {
           'required': true
         }
       },
-      'relations': {},
-      filebased: false
+      'relations': {}
     }, globalCtx, function (err2, model2) {
       expect(err2).to.be.not.ok;
       done(err2);
@@ -176,7 +174,6 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
       Customer = loopback.findModel("Customer");
       deleteAllUsers(function () {
         createEmployeeModels(function (err, result) {
-          console.log(err, result)
           return done();
         });
         //return done();
@@ -464,7 +461,6 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
         }]
       }], iciciCtx, function (err, results) {
         if (err) {
-          //console.log(JSON.stringify(err));
           return done(err);
         }
 
@@ -559,8 +555,7 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
         'zip': {
           'type': 'string'
         }
-      },
-      'filebased': false
+      }
     }, citiCtx, function (err, m) {
       if (err) {
         console.log(err);
@@ -684,7 +679,7 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
       properties: {
         'name': {
           'type': 'string',
-          'require' : true
+          'required': true
         }
       }
     };
@@ -709,7 +704,7 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
       properties: {
         'color': {
           'type': 'string',
-          'require': true
+          'required': true
         }
       }
     };
@@ -759,15 +754,13 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
       .post(basePath + '/Pens' + '?access_token=' + icicitoken)
       .send(penData)
       .end(function (err, res) {
-        if (err || res.body.error) {
-          return done(err || (new Error(res.body.error)));
+        if (res.body.error) {
+          //console.log(res.body.error);
+          expect(res.body.error.name).to.be.equal("ValidationError");
+          expect(res.status).to.be.equal(422);
+          return done();
         }
-        expect(res.status).to.be.equal(200);
-        var result = res.body;
-        expect(result.id).not.to.be.undefined;
-        // as color was not inserted in for icici pen
-        expect(result.color).to.be.undefined;
-        done();
+        return done(new Error("No Validation Error received."));
       });
   });
 
@@ -803,20 +796,8 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
         }
         expect(res.status).to.be.equal(200);
         var result = res.body;
-        expect(result.length).be.equal(2);
-        var foundpen = false;
-        var foundempty=false;
-        for (var i = 0; i < result.length; ++i) {
-          if (!foundpen && result[i].name === 'Reynolds' && !result[i].color) {
-            foundpen = true;
-          }
-          else if (!foundempty && result[i].id && !result[i].name) {
-            foundempty=true;
-          }
-        }
-        if (!foundempty || !foundpen) {
-          return done(new Error("Didn't find Pen record for icici tenant"));
-        }
+        expect(result.length).be.equal(1);
+        expect(result[0].name).to.be.equal("Reynolds");
         done();
       });
   });
@@ -840,7 +821,131 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
   });
 
 
+  function createCustomerModel(done) {
+    models.ModelDefinition.create({
+      'name': 'Customer',
+      variantOf: 'Customer',
+      properties: {
+        'phoneNumber': {
+          'type': 'string',
+          'required': true
+        }
+      },
+      'relations': {
+        'address': {
+          'type': 'hasMany',
+          'model': 'CustomerAddress',
+          'foreignKey': 'CustomerId'
+        }
+      },
+      'acls': [{
+        'principalType': 'ROLE',
+        'principalId': '$everyone',
+        'permission': 'ALLOW',
+        'accessType': '*'
+      }]
+    }, iciciCtx, function (err, model) {
+      if (err) {
+        return done(err);
+      }
+      models.ModelDefinition.create({
+        name: 'CustomerAddress',
+        base: 'BaseEntity',
+        properties: {
+          'country': {
+            'type': 'string',
+            'required': true
+          }
+        }
+      }, iciciCtx, function (err2, model2) {
+        expect(err2).to.be.not.ok;
+        done(err2);
+      });
+    });
+  }
+
+
+  it('t19 overriding Customer model using variantOf and create related model on fly', function (done) {
+    createCustomerModel(done);
+  });
+  it('t19-1 creating record for ICICI customer model', function (done) {
+    var customerData = {
+      name: "Atul",
+      age: 20,
+      phoneNumber: '1113334455',
+      address: [{
+        country: "India"
+      },
+        {
+          country: "Japan",
+        },
+        {
+          country: "USA",
+        }
+      ]
+    };
+    api
+      .set('Accept', 'application/json')
+      .post(basePath + '/Customers' + '?access_token=' + icicitoken)
+      .send(customerData)
+      .end(function (err, res) {
+        if (err || res.body.error) {
+          console.log(res.body.error);
+          return done(err || (new Error(res.body.error)));
+        }
+        expect(res.status).to.be.equal(200);
+        var result = res.body;
+        expect(result.id).not.to.be.undefined;
+        expect(result.name).to.be.equal('Atul');
+        expect(result.address.length).to.be.equal(3);
+        expect(result.address[0].country).to.be.equal("India");
+        done();
+      });
+  });
+  it('t19-2 - icici tenant is accessing Customer Model data - including address (using HTTP REST)', function (done) {
+    var filter = {
+      include: 'address'
+    };
+    api
+      .set('Accept', 'application/json')
+      .get(basePath + '/Customers' + '?filter={"include" : "address"}&access_token=' + icicitoken)
+      .send()
+      .end(function (err, res) {
+        if (err || res.body.error) {
+          return done(err || (new Error(res.body.error)));
+        }
+        expect(res.status).to.be.equal(200);
+        var result = res.body;
+        expect(result.length).be.equal(1);
+        expect(result[0].name).be.equal("Atul");
+        expect(result[0].address.length).be.equal(3);
+        var address = result[0].address;
+        var found1 = false;
+        var found2 = false;
+        var found3 = false;
+        for (var i = 0; i < 3; ++i) {
+          if (address[i].country === "India") {
+            found1 = true;
+          }
+          else if (address[i].country === "Japan") {
+            found2 = true;
+          }
+          else if (address[i].country === "USA") {
+            found3 = true;
+          }
+        }
+        if (!found1 || !found2 || !found3) {
+          return done(new Error("Country record not found in Customer record."))
+        }
+        done();
+      });
+  });
+
+
 });
+
+
+
 
 
 

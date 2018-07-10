@@ -79,6 +79,26 @@ function getVariantData(ctx, next) {
       return next();
     }
   }
+  if (ctx.query && ctx.query.include) {
+    if (_.isEmpty(variantModel.relations)) {
+      log.warn(ctx.options, "Model %s didn't have any relation defined", variantModel.modelName);
+      return next();
+    }
+    if (Array.isArray(ctx.query.include)) {
+      for (var i = 0; i < ctx.query.include.length; ++i) {
+        if (!variantModel.relations[ctx.query.include][i]) {
+          log.warn(ctx.options, "Model %s didn't have relation with name %s", variantModel.modelName, ctx.query.include[i]);
+          return next();
+        }
+      }
+    } else if (typeof ctx.query.include === 'string') {
+      if (!variantModel.relations[ctx.query.include]) {
+        log.warn(ctx.options, "Model %s didn't have relation with name %s", variantModel.modelName, ctx.query.include[i]);
+        return next();
+      }
+    }
+  }
+
   variantModel.find(ctx.query, ctx.options, function (err, variantData) {
     if (err) {
       return next(err);
