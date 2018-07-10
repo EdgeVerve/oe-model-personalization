@@ -11,8 +11,8 @@
   "db": {
     "host": "localhost",
     "port": 27017,
-    "url": "mongodb://localhost:27017/oe-model-personalization",
-    "database": "oe-personalization-test",
+    "url": "mongodb://localhost:27017/oe-model-personalization-test",
+    "database": "oe-model-personalization-test",
     "password": "admin",
     "name": "db",
     "connector": "mongodb",

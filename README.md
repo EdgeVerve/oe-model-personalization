@@ -6,7 +6,7 @@ This module allows to personalize records.
 * oe-cloud
 * oe-logger
 * oe-multi-tenancy
-* 
+* oe-validation
 
 
 
