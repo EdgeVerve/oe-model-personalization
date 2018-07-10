@@ -1,10 +1,9 @@
 /**
  *
- * �2018-2019 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
+ * ©2018-2019 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
  * Bangalore, India. All Rights Reserved.
  *
  */
-
 
 const inflection = require('inflection');
 const utils = require('../../lib/utils.js');
