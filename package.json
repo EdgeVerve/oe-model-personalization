@@ -22,7 +22,6 @@
     "oe-multi-tenancy": "git+http://evgit/atul/oe-multi-tenancy.git#master"
   },
   "devDependencies": {
-    "app-root-path": "^1.0.0",
     "babel-eslint": "^7.2.3",
     "chai": "^3.4.1",
     "chai-datetime": "^1.4.0",
@@ -41,9 +40,7 @@
     "istanbul": "0.4.1",
     "loopback-connector-postgresql": "git+http://evgit/atul/loopback-connector-postgresql.git#master",
     "mocha": "^3.4.2",
-    "nock": "^7.2.2",
     "oe-model-composite": "git+http://evgit/atul/oe-model-composite.git#master",
-    "sinon": "^1.17.7",
     "superagent-defaults": "^0.1.14",
     "supertest": "^1.1.0"
   },
