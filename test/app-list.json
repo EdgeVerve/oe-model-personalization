@@ -8,6 +8,10 @@
     "enabled": true
   },
   {
+    "path": "oe-expression",
+    "enabled":true 
+  },
+  {
     "path": "oe-validation",
     "enabled":true 
   },
