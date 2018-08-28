@@ -17,9 +17,9 @@
     "oe-logger": "^1.0.0",
     "camelcase": "^3.0.0",
     "lodash": "4.17.10",
-    "oe-cloud": "git+http://evgit/atul/oe-cloud.git#master",
-    "oe-validation": "git+http://evgit/atul/oe-validation.git#master",
-    "oe-multi-tenancy": "git+http://evgit/atul/oe-multi-tenancy.git#master"
+    "oe-cloud": "git+http://evgit/oec-next/oe-cloud.git#master",
+    "oe-validation": "git+http://evgit/oec-next/oe-validation.git#master",
+    "oe-multi-tenancy": "git+http://evgit/oec-next/oe-multi-tenancy.git#master"
   },
   "devDependencies": {
     "babel-eslint": "^7.2.3",
@@ -38,15 +38,15 @@
     "grunt-mocha-istanbul": "^5.0.2",
     "grunt-mocha-test": "^0.13.2",
     "istanbul": "0.4.1",
-    "loopback-connector-postgresql": "git+http://evgit/atul/loopback-connector-postgresql.git#master",
+    "loopback-connector-postgresql": "git+http://evgit/oec-next/loopback-connector-postgresql.git#master",
     "mocha": "^3.4.2",
-    "oe-model-composite": "git+http://evgit/atul/oe-model-composite.git#master",
+    "oe-model-composite": "git+http://evgit/oec-next/oe-model-composite.git#master",
     "superagent-defaults": "^0.1.14",
     "supertest": "^1.1.0"
   },
   "repository": {
     "type": "git",
-    "url": "git@evgit:atul/oe-model-personalization.git"
+    "url": "git@evgit:oec-next/oe-model-personalization.git"
   },
   "license": "MIT"
 }
