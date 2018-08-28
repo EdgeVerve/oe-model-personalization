@@ -38,7 +38,7 @@
     "grunt-mocha-istanbul": "^5.0.2",
     "grunt-mocha-test": "^0.13.2",
     "istanbul": "0.4.1",
-    "loopback-connector-postgresql": "git+http://evgit/oec-next/loopback-connector-postgresql.git#master",
+    "loopback-connector-postgresql": "git+http://evgit/oecloud.io/loopback-connector-postgresql.git#master",
     "mocha": "^3.4.2",
     "oe-model-composite": "git+http://evgit/oec-next/oe-model-composite.git#master",
     "superagent-defaults": "^0.1.14",
