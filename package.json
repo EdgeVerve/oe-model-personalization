@@ -14,11 +14,9 @@
     "grunt-cover": "grunt test-with-coverage"
   },
   "dependencies": {
-    "camelcase": "^3.0.0",
-    "lodash": "4.17.10",
-    "oe-cloud": "git+http://evgit/oec-next/oe-cloud.git#master",
-    "oe-validation": "git+http://evgit/oec-next/oe-validation.git#master",
-    "oe-multi-tenancy": "git+http://evgit/oec-next/oe-multi-tenancy.git#master"
+    "camelcase": "3.0.0",
+    "async": "2.6.1",
+    "lodash": "4.17.10"
   },
   "devDependencies": {
     "babel-eslint": "^7.2.3",
@@ -42,7 +40,10 @@
     "mocha": "^3.4.2",
     "oe-model-composite": "git+http://evgit/oec-next/oe-model-composite.git#master",
     "superagent-defaults": "^0.1.14",
-    "supertest": "^1.1.0"
+    "supertest": "^1.1.0",
+    "oe-cloud": "git+http://evgit/oec-next/oe-cloud.git#master",
+    "oe-validation": "git+http://evgit/oec-next/oe-validation.git#master",
+    "oe-multi-tenancy": "git+http://evgit/oec-next/oe-multi-tenancy.git#master"
   },
   "repository": {
     "type": "git",
