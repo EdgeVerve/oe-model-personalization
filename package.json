@@ -49,5 +49,6 @@
     "type": "git",
     "url": "git@evgit:oec-next/oe-model-personalization.git"
   },
+  "author" : "Atul Pandit <atul_pandit@infosys.com>",
   "license": "MIT"
 }
