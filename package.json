@@ -14,7 +14,7 @@
     "grunt-cover": "grunt test-with-coverage"
   },
   "dependencies": {
-    "camelcase": "3.0.0",
+    "camelcase": "5.0.0",
     "async": "2.6.1",
     "lodash": "4.17.11"
   },
