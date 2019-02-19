@@ -1,7 +1,7 @@
 {
   "name": "oe-model-personalization",
   "version": "2.0.0",
-  "description": "oe-cloud modularization project aka oec-next",
+  "description": "oe-cloud modularization project aka oecloud.io",
   "engines": {
     "node": ">=6"
   },
@@ -39,15 +39,15 @@
     "superagent-defaults": "0.1.14",
     "supertest": "3.4.2",
     "loopback-connector-mongodb": "3.9.2",
-    "oe-connector-postgresql": "git+http://evgit/oec-next/oe-connector-postgresql.git#master",
-    "oe-model-composite": "git+http://evgit/oec-next/oe-model-composite.git#master",
-    "oe-cloud": "git+http://evgit/oec-next/oe-cloud.git#master",
-    "oe-validation": "git+http://evgit/oec-next/oe-validation.git#master",
-    "oe-multi-tenancy": "git+http://evgit/oec-next/oe-multi-tenancy.git#master"
+    "oe-connector-postgresql": "git+http://evgit/oecloud.io/oe-connector-postgresql.git#master",
+    "oe-model-composite": "git+http://evgit/oecloud.io/oe-model-composite.git#master",
+    "oe-cloud": "git+http://evgit/oecloud.io/oe-cloud.git#master",
+    "oe-validation": "git+http://evgit/oecloud.io/oe-validation.git#master",
+    "oe-multi-tenancy": "git+http://evgit/oecloud.io/oe-multi-tenancy.git#master"
   },
   "repository": {
     "type": "git",
-    "url": "git@evgit:oec-next/oe-model-personalization.git"
+    "url": "https://github.com/EdgeVerve/oe-model-personalization.git"
   },
   "author" : "Atul Pandit <atul_pandit@infosys.com>",
   "license": "MIT"

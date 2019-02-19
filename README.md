@@ -1,4 +1,4 @@
-# oe-model-personalization 
+# oe-model-personalization
 
 - [Introduction](#introduction)
 - [Dependency on oe-multi-tenancy](#dependency-on-oe-multi-tenancy)
@@ -30,9 +30,9 @@ This module is highly dependent on oe-multi-tenancy module. Therefore all docume
 
 # Facts of model personalization
 
-* It works only on autoscope fields. 
+* It works only on autoscope fields.
 * ModelDefinition Model must have oe-multi-tenancy mixin enabled. This is automatically done by this module
-* Autoscope fields must be set for ModelDefinition. 
+* Autoscope fields must be set for ModelDefinition.
 * It keeps model hierarchy in memory for quicker access to decide to which model API should be redirected to.
 * It can use same collection for **ONLY FOR** MongoDB and Memory DB
 * For SQL Databases, it will create new table when Model is personalized
@@ -54,7 +54,7 @@ In this section, we will see how we can use install this module in our project. 
 ## Testing and Code coverage
 
 ```sh
-$ git clone http://evgit/oec-next/oe-model-personalization.git
+$ git clone http://evgit/oecloud.io/oe-model-personalization.git
 $ cd oe-model-personalization
 $ npm install --no-optional
 $ npm run grunt-cover
@@ -69,10 +69,10 @@ To use oe-model-personalization in your project, you must include this package i
 
 
 ```javascript
-"oe-model-personalization": "git+http://evgit/oec-next/oe-model-personalization.git#master"
+"oe-model-personalization": "git+http://evgit/oecloud.io/oe-model-personalization.git#master"
 ```
 
-You can also install this mixin on command line using npm install. 
+You can also install this mixin on command line using npm install.
 
 
 ```sh
@@ -103,7 +103,7 @@ As shown above, oe-multi-tenancy must be enabled.
 
 ### Enabling or Disabling
 
-There is some control given to enable or disable this functionality. 
+There is some control given to enable or disable this functionality.
 This module when loaded, it will attach functionality (mixin) on BaseEntity model. Therefore, by default, all models derived from BaseEntity will be affected when you include this module.
 If you want to make this module work with specific Models, you need to change the way it is loaded. For that use following entry in your app-list.json
 
@@ -131,7 +131,7 @@ And then you will have to enable the mixin explicitely on those model which requ
 
 ## ModelDefinition
 
-Model Personalization module uses oe-multi-tenancy module to achieve multi tenancy for ModelDefinition. **ModelDefinition** model is core of this module. ModelDefinition model is defined in oe-cloud project. This model is used to store all models and its schema. This way, any models which are dynamically created can be persisted and be loaded again when application starts. 
+Model Personalization module uses oe-multi-tenancy module to achieve multi tenancy for ModelDefinition. **ModelDefinition** model is core of this module. ModelDefinition model is defined in oe-cloud project. This model is used to store all models and its schema. This way, any models which are dynamically created can be persisted and be loaded again when application starts.
 
 oe-model-personalization module actually make this model as multi-tenant model by applying oe-multi-tenancy. Therefore, when user queries this model, data is returned based on his/her context. All models are **default** tenant based and hence by default, all users can see all the models.
 
