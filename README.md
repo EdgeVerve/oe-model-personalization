@@ -69,7 +69,7 @@ To use oe-model-personalization in your project, you must include this package i
 
 
 ```javascript
-"oe-model-personalization": "git+http://evgit/oecloud.io/oe-model-personalization.git#master"
+"oe-model-personalization": "git+http://evgit/oecloud.io/oe-model-personalization.git#2.0.0"
 ```
 
 You can also install this mixin on command line using npm install.

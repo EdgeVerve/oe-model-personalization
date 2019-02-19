@@ -39,11 +39,11 @@
     "superagent-defaults": "0.1.14",
     "supertest": "3.4.2",
     "loopback-connector-mongodb": "3.9.2",
-    "oe-connector-postgresql": "git+http://evgit/oecloud.io/oe-connector-postgresql.git#master",
-    "oe-model-composite": "git+http://evgit/oecloud.io/oe-model-composite.git#master",
-    "oe-cloud": "git+http://evgit/oecloud.io/oe-cloud.git#master",
-    "oe-validation": "git+http://evgit/oecloud.io/oe-validation.git#master",
-    "oe-multi-tenancy": "git+http://evgit/oecloud.io/oe-multi-tenancy.git#master"
+    "oe-connector-postgresql": "git+http://evgit/oecloud.io/oe-connector-postgresql.git#2.0.0",
+    "oe-model-composite": "git+http://evgit/oecloud.io/oe-model-composite.git#2.0.0",
+    "oe-cloud": "git+http://evgit/oecloud.io/oe-cloud.git#2.0.0",
+    "oe-validation": "git+http://evgit/oecloud.io/oe-validation.git#2.0.0",
+    "oe-multi-tenancy": "git+http://evgit/oecloud.io/oe-multi-tenancy.git#2.0.0"
   },
   "repository": {
     "type": "git",
