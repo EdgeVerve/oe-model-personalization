@@ -39,7 +39,7 @@ npminstall:
     paths:
       - node_modules/
   tags:
-    - CEP_RUNNER_EE
+    - CEP_RUNNER
 
 
 mongotest:
@@ -60,7 +60,7 @@ mongotest:
       - coverage/
     when: on_failure
   tags:
-    - CEP_RUNNER_EE
+    - CEP_RUNNER
 
 postgrestest:
   stage: pre-build-test
@@ -75,7 +75,7 @@ postgrestest:
     - time npm install --no-optional
     - npm run grunt-cover
   tags:
-    - CEP_RUNNER_EE    
+    - CEP_RUNNER    
     
 oracletest:
   image: $REGISTRY/debian-node-oracle-docker
@@ -101,6 +101,6 @@ oracletest:
     - echo "Oracle user details:"${ORACLE_USERNAME}"/"${ORACLE_PASSWORD}
     - npm run grunt-cover
   tags:
-    - CEP_RUNNER_EE    
+    - CEP_RUNNER    
 
 
