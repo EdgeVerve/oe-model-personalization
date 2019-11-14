@@ -99,6 +99,9 @@ function getVariantData(ctx, next) {
     }
   }
 
+  if (Model.settings.fetchVariantData !== true) {
+    return next();
+  }
   variantModel.find(ctx.query, ctx.options, function (err, variantData) {
     if (err) {
       return next(err);

@@ -10,11 +10,11 @@ var oecloud = require('oe-cloud');
 var loopback = require('loopback');
 
 oecloud.observe('loaded', function (ctx, next) {
-  oecloud.setBaseEntityAutoscope(["tenantId"]);
-  oecloud.attachMixinsToBaseEntity("ModelPersonalizationMixin");
-  oecloud.setModelDefinitionAutoscope(["tenantId"]);
+  oecloud.setBaseEntityAutoscope(['tenantId']);
+  oecloud.attachMixinsToBaseEntity('ModelPersonalizationMixin');
+  oecloud.setModelDefinitionAutoscope(['tenantId']);
   return next();
-})
+});
 
 oecloud.boot(__dirname, function (err) {
   if (err) {
@@ -22,36 +22,31 @@ oecloud.boot(__dirname, function (err) {
     process.exit(1);
   }
   var accessToken = loopback.findModel('AccessToken');
-  accessToken.observe("before save", function (ctx, next) {
-    var userModel = loopback.findModel("User");
+  accessToken.observe('before save', function (ctx, next) {
+    var userModel = loopback.findModel('User');
     var instance = ctx.instance;
     userModel.find({ where: { id: instance.userId } }, {}, function (err, result) {
       if (err) {
         return next(err);
       }
-      if (result.length != 1) {
-        return next(new Error("No User Found"));
+      if (result.length !== 1) {
+        return next(new Error('No User Found'));
       }
       var user = result[0];
-      if(!instance.ctx){
-	instance.ctx = {};
+      if (!instance.ctx) {
+        instance.ctx = {};
       }
-      if (user.username === "admin") {
+      if (user.username === 'admin') {
         instance.ctx.tenantId = '/default';
-      }
-      else if (user.username === "evuser") {
+      } else if (user.username === 'evuser') {
         instance.ctx.tenantId = '/default/infosys/ev';
-      }
-      else if (user.username === "infyuser") {
+      } else if (user.username === 'infyuser') {
         instance.ctx.tenantId = '/default/infosys';
-      }
-      else if (user.username === "bpouser") {
+      } else if (user.username === 'bpouser') {
         instance.ctx.tenantId = '/default/infosys/bpo';
-      }
-      else if (user.username === "iciciuser") {
+      } else if (user.username === 'iciciuser') {
         instance.ctx.tenantId = '/default/icici';
-      }
-      else if (user.username === "citiuser") {
+      } else if (user.username === 'citiuser') {
         instance.ctx.tenantId = '/default/citi';
       }
       return next(err);
@@ -62,10 +57,8 @@ oecloud.boot(__dirname, function (err) {
 });
 
 
-
 var chalk = require('chalk');
 var chai = require('chai');
-var async = require('async');
 chai.use(require('chai-things'));
 
 var expect = chai.expect;
@@ -73,17 +66,13 @@ var expect = chai.expect;
 var app = oecloud;
 var defaults = require('superagent-defaults');
 var supertest = require('supertest');
-var Customer;
 var api = defaults(supertest(app));
 var basePath = app.get('restApiRoot');
-var url = basePath + '/Employees';
 
 var models = oecloud.models;
 
-
-
 function deleteAllUsers(done) {
-  var userModel = loopback.findModel("User");
+  var userModel = loopback.findModel('User');
   userModel.destroyAll({}, {}, function (err) {
     if (err) {
       return done(err);
@@ -93,7 +82,7 @@ function deleteAllUsers(done) {
         return done(err2);
       }
       if (r2 && r2.length > 0) {
-        return done(new Error("Error : users were not deleted"));
+        return done(new Error('Error : users were not deleted'));
       }
     });
     return done(err);
@@ -102,11 +91,11 @@ function deleteAllUsers(done) {
 
 var globalCtx = {
   ignoreAutoScope: true,
-  ctx: { tenantId : '/default'}
+  ctx: { tenantId: '/default'}
 };
 
 var iciciCtx = {
-  ctx: { tenantId : '/default/icici'}
+  ctx: { tenantId: '/default/icici'}
 };
 
 var citiCtx = {
@@ -170,12 +159,11 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
   this.timeout(10000);
   before('wait for boot scripts to complete', function (done) {
     app.on('test-start', function () {
-      Customer = loopback.findModel("Customer");
       deleteAllUsers(function () {
         createEmployeeModels(function (err, result) {
           return done();
         });
-        //return done();
+        // return done();
       });
     });
   });
@@ -187,39 +175,38 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
   it('t1 create user admin/admin with /default tenant', function (done) {
     var url = basePath + '/users';
     api.set('Accept', 'application/json')
-    .post(url)
-    .send([{ username: "admin", password: "admin", email: "admin@admin.com" },
-    { username: "evuser", password: "evuser", email: "evuser@evuser.com" },
-    { username: "infyuser", password: "infyuser", email: "infyuser@infyuser.com" },
-    { username: "bpouser", password: "bpouser", email: "bpouser@bpouser.com" },
-    { username: "iciciuser", password: "iciciuser", email: "iciciuser@iciciuser.com" },
-    { username: "citiuser", password: "citiuser", email: "citiuser@citiuser.com" }
-    ])
-    .end(function (err, response) {
-
-      var result = response.body;
-      expect(result[0].id).to.be.defined;
-      expect(result[1].id).to.be.defined;
-      expect(result[2].id).to.be.defined;
-      expect(result[3].id).to.be.defined;
-      expect(result[4].id).to.be.defined;
-      expect(result[5].id).to.be.defined;
-      done();
-    });
+      .post(url)
+      .send([{ username: 'admin', password: 'admin', email: 'admin@admin.com' },
+        { username: 'evuser', password: 'evuser', email: 'evuser@evuser.com' },
+        { username: 'infyuser', password: 'infyuser', email: 'infyuser@infyuser.com' },
+        { username: 'bpouser', password: 'bpouser', email: 'bpouser@bpouser.com' },
+        { username: 'iciciuser', password: 'iciciuser', email: 'iciciuser@iciciuser.com' },
+        { username: 'citiuser', password: 'citiuser', email: 'citiuser@citiuser.com' }
+      ])
+      .end(function (err, response) {
+        var result = response.body;
+        expect(result[0].id).to.be.defined;
+        expect(result[1].id).to.be.defined;
+        expect(result[2].id).to.be.defined;
+        expect(result[3].id).to.be.defined;
+        expect(result[4].id).to.be.defined;
+        expect(result[5].id).to.be.defined;
+        done();
+      });
   });
 
   var adminToken;
   it('t2 Login with admin credentials', function (done) {
     var url = basePath + '/users/login';
     api.set('Accept', 'application/json')
-    .post(url)
-    .send({ username: "admin", password: "admin" })
-    .end(function (err, response) {
-      var result = response.body;
-      adminToken = result.id;
-      expect(adminToken).to.be.defined;
-      done();
-    });
+      .post(url)
+      .send({ username: 'admin', password: 'admin' })
+      .end(function (err, response) {
+        var result = response.body;
+        adminToken = result.id;
+        expect(adminToken).to.be.defined;
+        done();
+      });
   });
 
 
@@ -227,28 +214,28 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
   it('t3 Login with infy credentials', function (done) {
     var url = basePath + '/users/login';
     api.set('Accept', 'application/json')
-    .post(url)
-    .send({ username: "infyuser", password: "infyuser" })
-    .end(function (err, response) {
-      var result = response.body;
-      infyToken = result.id;
-      expect(infyToken).to.be.defined;
-      done();
-    });
+      .post(url)
+      .send({ username: 'infyuser', password: 'infyuser' })
+      .end(function (err, response) {
+        var result = response.body;
+        infyToken = result.id;
+        expect(infyToken).to.be.defined;
+        done();
+      });
   });
 
   var evToken;
   it('t4 Login with ev credentials', function (done) {
     var url = basePath + '/users/login';
     api.set('Accept', 'application/json')
-    .post(url)
-    .send({ username: "evuser", password: "evuser" })
-    .end(function (err, response) {
-      var result = response.body;
-      evToken = result.id;
-      expect(evToken).to.be.defined;
-      done();
-    });
+      .post(url)
+      .send({ username: 'evuser', password: 'evuser' })
+      .end(function (err, response) {
+        var result = response.body;
+        evToken = result.id;
+        expect(evToken).to.be.defined;
+        done();
+      });
   });
 
 
@@ -256,14 +243,14 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
   it('t5 Login with bpo credentials', function (done) {
     var url = basePath + '/users/login';
     api.set('Accept', 'application/json')
-    .post(url)
-    .send({ username: "bpouser", password: "bpouser" })
-    .end(function (err, response) {
-      var result = response.body;
-      bpoToken = result.id;
-      expect(bpoToken).to.be.defined;
-      done();
-    });
+      .post(url)
+      .send({ username: 'bpouser', password: 'bpouser' })
+      .end(function (err, response) {
+        var result = response.body;
+        bpoToken = result.id;
+        expect(bpoToken).to.be.defined;
+        done();
+      });
   });
 
 
@@ -271,14 +258,14 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
   it('t5 Login with bpo credentials', function (done) {
     var url = basePath + '/users/login';
     api.set('Accept', 'application/json')
-    .post(url)
-    .send({ username: "iciciuser", password: "iciciuser" })
-    .end(function (err, response) {
-      var result = response.body;
-      icicitoken = result.id;
-      expect(bpoToken).to.be.defined;
-      done();
-    });
+      .post(url)
+      .send({ username: 'iciciuser', password: 'iciciuser' })
+      .end(function (err, response) {
+        var result = response.body;
+        icicitoken = result.id;
+        expect(bpoToken).to.be.defined;
+        done();
+      });
   });
 
 
@@ -286,21 +273,20 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
   it('t5 Login with bpo credentials', function (done) {
     var url = basePath + '/users/login';
     api.set('Accept', 'application/json')
-    .post(url)
-    .send({ username: "citiuser", password: "citiuser" })
-    .end(function (err, response) {
-      var result = response.body;
-      cititoken = result.id;
-      expect(bpoToken).to.be.defined;
-      done();
-    });
+      .post(url)
+      .send({ username: 'citiuser', password: 'citiuser' })
+      .end(function (err, response) {
+        var result = response.body;
+        cititoken = result.id;
+        expect(bpoToken).to.be.defined;
+        done();
+      });
   });
 
   it('t6 clean up Employee and EmployeeAddress models', function (done) {
     var Employee = loopback.getModel('Employee', defaultContext);
     Employee.destroyAll({}, { ignoreAutoScope: true }, function (err) {
-      if (err)
-        return done(err);
+      if (err) {return done(err);}
       var EmployeeAddress = loopback.getModel('EmployeeAddress', defaultContext);
       EmployeeAddress.destroyAll({}, { ignoreAutoScope: true }, function (err) {
         return done(err);
@@ -381,7 +367,6 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
   });
 
 
-
   it('t9 - Fetch data as Citi - should return ONE Employees and two addresses for it', function (done) {
     var Employee = loopback.getModel('Employee', citiCtx);
     Employee.find({
@@ -391,7 +376,7 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
         console.log(err);
         return done(err);
       }
-      //console.log(JSON.stringify(results));
+      // console.log(JSON.stringify(results));
       expect(results.length).to.equal(1);
       expect(results[0]).to.have.property('name');
       expect(results[0]).to.have.property('id');
@@ -414,7 +399,7 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
         console.log(err);
         return done(err);
       }
-      //console.log(JSON.stringify(results));
+      // console.log(JSON.stringify(results));
       expect(results.length).to.equal(2);
       expect(results[0]).to.have.property('name');
       expect(results[0]).to.have.property('id');
@@ -431,10 +416,13 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
     // new Employee model will b created in mongo
     // mongo:true is set so that new collection will be used
     models.ModelDefinition.create({
-      'name': 'Employee',
-      'variantOf': 'Employee',
-      'idInjection': false,
-      'base': 'Employee',
+      name: 'Employee',
+      variantOf: 'Employee',
+      idInjection: false,
+      base: 'Employee',
+      options: {
+        fetchVariantData: true
+      },
       mongodb: {
         collection: 'employee-icici'
       },
@@ -479,7 +467,7 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
           expect(results[0]).to.have.property('name');
           expect(results[0]).to.have.property('id');
           expect(results[0].__data).to.have.property('address');
-          //expect(results[0]).to.have.property('age');
+          // expect(results[0]).to.have.property('age');
           var doneFlag = false;
           for (var i = 0; i < results.length && !doneFlag; ++i) {
             if (results[i].name === 'Icici Tom') {
@@ -526,7 +514,7 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
         console.log(err);
         return done(err);
       }
-      //console.log(JSON.stringify(results));
+      // console.log(JSON.stringify(results));
       expect(results.length).to.equal(1);
       expect(results[0]).to.have.property('name');
       expect(results[0]).to.have.property('id');
@@ -540,13 +528,16 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
   });
 
   it('t14 - Personalized Address model for citi', function (done) {
-    //EmployeeAddress model is personalized and new model with random number will be created
-    //mongodb: true is set thus it will create new collection
+    // EmployeeAddress model is personalized and new model with random number will be created
+    // mongodb: true is set thus it will create new collection
     models.ModelDefinition.create({
-      'name': 'EmployeeAddress',
-      'variantOf': 'EmployeeAddress',
-      'idInjection': false,
-      'base': 'EmployeeAddress',
+      name: 'EmployeeAddress',
+      variantOf: 'EmployeeAddress',
+      idInjection: false,
+      base: 'EmployeeAddress',
+      options: {
+        fetchVariantData: true
+      },
       mongodb: {
         collection: 'employeeaddress-citi'
       },
@@ -627,12 +618,14 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
 
 
   it('t15 - Personalized Employee model for citi using HTTP REST', function (done) {
-
     var Employeemodel = {
-      'name': 'Employee',
-      'variantOf': 'Employee',
-      'idInjection': false,
-      'mongodb': {},
+      name: 'Employee',
+      variantOf: 'Employee',
+      idInjection: false,
+      mongodb: {},
+      options: {
+        fetchVariantData: true
+      },
       properties: {
         'firstName': {
           'type': 'string'
@@ -645,11 +638,11 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
       .post(basePath + '/ModelDefinitions' + '?access_token=' + cititoken)
       .send(Employeemodel)
       .expect(200).end(function (err, res) {
-        //console.log('response body : ' + JSON.stringify(res.body, null, 4));
+        // console.log('response body : ' + JSON.stringify(res.body, null, 4));
         if (err || res.body.error) {
           return done(err || (new Error(res.body.error)));
         }
-        //var results = res.body;
+        // var results = res.body;
         done();
       });
   });
@@ -660,7 +653,7 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
       .get(basePath + '/Employees?access_token=' + cititoken)
       .send()
       .expect(200).end(function (err, res) {
-        //console.log('response body : ' + JSON.stringify(res.body, null, 4));
+        // console.log('response body : ' + JSON.stringify(res.body, null, 4));
         if (err || res.body.error) {
           return done(err || (new Error(res.body.error)));
         }
@@ -688,11 +681,11 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
       .post(basePath + '/ModelDefinitions' + '?access_token=' + icicitoken)
       .send(penModel)
       .expect(200).end(function (err, res) {
-        //console.log('response body : ' + JSON.stringify(res.body, null, 4));
+        // console.log('response body : ' + JSON.stringify(res.body, null, 4));
         if (err || res.body.error) {
           return done(err || (new Error(res.body.error)));
         }
-        //var results = res.body;
+        // var results = res.body;
         done();
       });
   });
@@ -713,11 +706,11 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
       .post(basePath + '/ModelDefinitions' + '?access_token=' + cititoken)
       .send(penModel)
       .expect(200).end(function (err, res) {
-        //console.log('response body : ' + JSON.stringify(res.body, null, 4));
+        // console.log('response body : ' + JSON.stringify(res.body, null, 4));
         if (err || res.body.error) {
           return done(err || (new Error(res.body.error)));
         }
-        //var results = res.body;
+        // var results = res.body;
         done();
       });
   });
@@ -739,7 +732,7 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
         var result = res.body;
         expect(result.id).not.to.be.undefined;
         expect(result.name).to.be.equal('Reynolds');
-        //var results = res.body;
+        // var results = res.body;
         done();
       });
   });
@@ -754,12 +747,12 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
       .send(penData)
       .end(function (err, res) {
         if (res.body.error) {
-          //console.log(res.body.error);
-          expect(res.body.error.name).to.be.equal("ValidationError");
+          // console.log(res.body.error);
+          expect(res.body.error.name).to.be.equal('ValidationError');
           expect(res.status).to.be.equal(422);
           return done();
         }
-        return done(new Error("No Validation Error received."));
+        return done(new Error('No Validation Error received.'));
       });
   });
 
@@ -796,7 +789,7 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
         expect(res.status).to.be.equal(200);
         var result = res.body;
         expect(result.length).be.equal(1);
-        expect(result[0].name).to.be.equal("Reynolds");
+        expect(result[0].name).to.be.equal('Reynolds');
         done();
       });
   });
@@ -869,18 +862,18 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
   });
   it('t19-1 creating record for ICICI customer model', function (done) {
     var customerData = {
-      name: "Atul",
+      name: 'Atul',
       age: 20,
       phoneNumber: '1113334455',
       address: [{
-        country: "India"
+        country: 'India'
       },
-        {
-          country: "Japan",
-        },
-        {
-          country: "USA",
-        }
+      {
+        country: 'Japan'
+      },
+      {
+        country: 'USA'
+      }
       ]
     };
     api
@@ -897,7 +890,7 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
         expect(result.id).not.to.be.undefined;
         expect(result.name).to.be.equal('Atul');
         expect(result.address.length).to.be.equal(3);
-        expect(result.address[0].country).to.be.equal("India");
+        expect(result.address[0].country).to.be.equal('India');
         done();
       });
   });
@@ -916,35 +909,27 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
         expect(res.status).to.be.equal(200);
         var result = res.body;
         expect(result.length).be.equal(1);
-        expect(result[0].name).be.equal("Atul");
+        expect(result[0].name).be.equal('Atul');
         expect(result[0].address.length).be.equal(3);
         var address = result[0].address;
         var found1 = false;
         var found2 = false;
         var found3 = false;
         for (var i = 0; i < 3; ++i) {
-          if (address[i].country === "India") {
+          if (address[i].country === 'India') {
             found1 = true;
-          }
-          else if (address[i].country === "Japan") {
+          } else if (address[i].country === 'Japan') {
             found2 = true;
-          }
-          else if (address[i].country === "USA") {
+          } else if (address[i].country === 'USA') {
             found3 = true;
           }
         }
         if (!found1 || !found2 || !found3) {
-          return done(new Error("Country record not found in Customer record."))
+          return done(new Error('Country record not found in Customer record.'));
         }
         done();
       });
   });
-
-
 });
-
-
-
-
 
 
