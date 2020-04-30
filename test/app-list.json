@@ -5,14 +5,17 @@
   },
   {
     "path": "oe-multi-tenancy",
+    "autoEnableMixins" : true,
     "enabled": true
   },
   {
     "path": "oe-expression",
+    "autoEnableMixins" : true,
     "enabled":true 
   },
   {
     "path": "oe-validation",
+    "autoEnableMixins" : true,
     "enabled":true 
   },
   {
